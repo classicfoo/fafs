@@ -136,6 +136,14 @@ def copy_path_to_clipboard():
         item = results.item(item, "values")[1]  # Get the full path (index 1)
         pyperclip.copy(item)
 
+def copy_filename_to_clipboard():
+    item = results.selection()
+    if item:
+        item = results.item(item, "values")[1]  # Get the full path (index 1)
+        filename = os.path.basename(item)  # Get only the filename
+        filename_with_quotes = f'"{filename}"'  # Add quotes around the filename
+        pyperclip.copy(filename_with_quotes)
+
 def open_in_explorer():
     item = results.selection()
     if item:
@@ -239,6 +247,7 @@ results.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 # Create a context menu for the Treeview
 context_menu = tk.Menu(window, tearoff=0)
 context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
+context_menu.add_command(label="Copy Filename", command=copy_filename_to_clipboard)
 context_menu.add_command(label="Open in Explorer", command=open_in_explorer)
 context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_to_underscores_context_menu)
 context_menu.add_command(label="Rename", command=rename_item)
