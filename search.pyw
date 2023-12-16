@@ -7,6 +7,7 @@ import pyperclip  # A library for clipboard operations
 import time
 import send2trash  # Import the send2trash library for moving files to the recycle bin
 from functools import partial  # Import functools.partial
+import subprocess
 
 def select_first_item(treeview):
     # Get the first item in the Treeview (if available)
@@ -208,6 +209,20 @@ def move_to_recycle_bin():
                     # Remove the item from the Treeview
                     results.delete(item)
 
+def open_with_editor():
+    item = results.selection()
+    if item:
+        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+
+    # Check if the file is a text file (you can add more extensions)
+    if file_path.endswith(('.txt','.md')):
+        editor_path = "C:\\Users\\micha\\Documents\\my_documents\\projects\\editor\\editor.pyw"
+        subprocess.Popen(['python', editor_path, file_path])
+    else:
+        tkinter.messagebox.messagebox.showinfo("Info", "Selected file is not a text file.")
+
+# Assuming you have some way in your GUI to trigger this function (e.g., double-click, button, etc.)
+
 # Create the main window
 window = tk.Tk()
 window.title("File and Folder Search")
@@ -258,6 +273,7 @@ context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
 context_menu.add_command(label="Copy Filename", command=copy_filename_to_clipboard)
 context_menu.add_command(label="Open in Explorer", command=open_in_explorer)
 context_menu.add_command(label="Touch", command=touch_command)
+context_menu.add_command(label="Open with Editor", command=open_with_editor)
 context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_to_underscores_context_menu)
 context_menu.add_command(label="Rename", command=rename_item)
 context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bin)
