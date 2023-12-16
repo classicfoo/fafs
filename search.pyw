@@ -217,7 +217,7 @@ def open_with_editor():
     # Check if the file is a text file (you can add more extensions)
     if file_path.endswith(('.txt','.md')):
         editor_path = "C:\\Users\\micha\\Documents\\my_documents\\projects\\editor\\editor.pyw"
-        subprocess.Popen(['python', editor_path, file_path])
+        subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
     else:
         tkinter.messagebox.messagebox.showinfo("Info", "Selected file is not a text file.")
 
