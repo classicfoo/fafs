@@ -289,5 +289,6 @@ entry.bind("<FocusIn>", partial(on_entry_focus_in, entry=entry, tree=results))
 # Bind the focus-in event of the Treeview widget to select the first item
 results.bind("<FocusIn>", lambda event: select_first_item(results))
 
+results.bind('<F2>', lambda e: rename_item())
 
 window.mainloop()
