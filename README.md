@@ -8,6 +8,7 @@ Download the script and place into the root folder for which you want to search.
 # Features
 - When right clicking, highlight the line underneath the cursor before showing context menu.
 - Add touch command to context menu allowing user to send a file to the top of the list.
+- Add open in editor to context menu allowing user to open txt files in editor.pyw
 - Press F2 to rename a file/folder.
  
 
