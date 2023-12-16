@@ -150,6 +150,14 @@ def open_in_explorer():
         item = results.item(item, "values")[1]  # Get the full path (index 1)
         os.system(f'explorer /select,"{item}"')
 
+def touch_command():
+    item = results.selection()
+    if item:
+        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+        current_time = time.time()
+        os.utime(file_path, (current_time, current_time))  # Update the modification time
+        search_files()
+
 def confirm_close():
     confirmed = tkinter.messagebox.askyesno("Confirm Close", "Are you sure you want to close the program?")
     if confirmed:
@@ -249,6 +257,7 @@ context_menu = tk.Menu(window, tearoff=0)
 context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
 context_menu.add_command(label="Copy Filename", command=copy_filename_to_clipboard)
 context_menu.add_command(label="Open in Explorer", command=open_in_explorer)
+context_menu.add_command(label="Touch", command=touch_command)
 context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_to_underscores_context_menu)
 context_menu.add_command(label="Rename", command=rename_item)
 context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bin)
@@ -256,8 +265,20 @@ context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bi
 def show_context_menu(event):
     item = results.identify_row(event.y)
     if item:
+        on_right_click(event)
         context_menu.post(event.x_root, event.y_root)
 
+def on_right_click(event):
+    # Identify the region at the cursor (column, row, etc.)
+    region = results.identify_region(event.x, event.y)
+    
+    # Check if the region is a row (an item in the TreeView)
+    if region == "tree":
+        # Identify the row under the cursor
+        row_id = results.identify_row(event.y)
+        
+        # Change the selection to this row
+        results.selection_set(row_id)
 
 # Bind the right-click event to show the context menu
 results.bind("<Button-3>", show_context_menu)
