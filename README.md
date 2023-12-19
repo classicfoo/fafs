@@ -17,3 +17,4 @@ Download the script and place into the root folder for which you want to search.
 # Todo
 - Add open in vscode in context menu
 - Make config file to set where root search folder is, where archive folder is and where editor.pwy is. 
+- Add command palette (combobox) to the right of searchbar. It will have all the options listed in the context menu.
