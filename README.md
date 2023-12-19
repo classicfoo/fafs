@@ -16,4 +16,5 @@ Download the script and place into the root folder for which you want to search.
 
 # Todo
 - Add send to archive in context menu (or press backspace to archive)
+- Add open in vscode in context menu
 - Make config file to set where root search folder is, where archive folder is and where editor.pwy is. 
