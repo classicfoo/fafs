@@ -120,16 +120,26 @@ def search_files(event=None):
     results.bind('<Return>', open_item)
 
 def open_item(event):
-    item = results.selection()
-    if item:
-        item = results.item(item, "values")[1]  # Get the full path (index 1)
-        os.startfile(item)
+    #item = results.selection()
+    #if item:
+    #    item = results.item(item, "values")[1]  # Get the full path (index 1)
+    #    os.startfile(item)
+    double_click()
 
-def double_click(event):
+def double_click(event=None):
     item = results.selection()
+
     if item:
+        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+
+    # Check if the file is a text file (you can add more extensions)
+    if file_path.endswith(('.txt','.md')):
+        editor_path = "C:\\Users\\MichaelHuynh\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
+        subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
+    else:
         item = results.item(item, "values")[1]  # Get the full path (index 1)
         os.startfile(item)
+        tkinter.messagebox.messagebox.showinfo("Info", "Selected file is not a text file.")
 
 def copy_path_to_clipboard():
     item = results.selection()
@@ -216,7 +226,7 @@ def open_with_editor():
 
     # Check if the file is a text file (you can add more extensions)
     if file_path.endswith(('.txt','.md')):
-        editor_path = "C:\\Users\\micha\\Documents\\my_documents\\projects\\editor\\editor.pyw"
+        editor_path = "C:\\Users\\MichaelHuynh\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
         subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
     else:
         tkinter.messagebox.messagebox.showinfo("Info", "Selected file is not a text file.")
