@@ -10,12 +10,12 @@ Download the script and place into the root folder for which you want to search.
 - Add touch command to context menu allowing user to send a file to the top of the list.
 - Add open in editor to context menu allowing user to open txt files in editor.pyw
 - Press F2 to rename a file/folder.
- 
+- Double click to open in editor
+
 
 
 # Todo
 - Add send to archive in context menu (or press backspace to archive)
-- Double click to open in editor
 - Draw 2x red border around entry or treeview widget only when widget is focused. (for better visibility on which widget is selected)
 - Show animation when window is minimized so that it's more visibile when selecting a window in the taskbar peek preview. 
 - Open text files in editor program
