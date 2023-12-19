@@ -340,4 +340,8 @@ results.bind("<FocusIn>", lambda event: select_first_item(results))
 
 results.bind('<F2>', lambda e: rename_item())
 
+# Bind the Backspace key to the move_to_archive function for the results Treeview
+results.bind('<BackSpace>', lambda e: move_to_archive())
+
+
 window.mainloop()
