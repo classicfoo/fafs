@@ -9,6 +9,28 @@ import send2trash  # Import the send2trash library for moving files to the recyc
 from functools import partial  # Import functools.partial
 import subprocess
 
+def move_to_archive():
+    item = results.selection()
+    if item:
+        item_values = results.item(item, "values")
+        if item_values:
+            item_path = item_values[1]  # Get the full path (index 1)
+            
+            # Define the path of the archive folder
+            archive_folder = "C:\\Users\\MichaelHuynh\\Documents\\archive"
+            
+            # Construct the new path in the archive folder
+            new_path = os.path.join(archive_folder, os.path.basename(item_path))
+
+            try:
+                # Move the file/folder to the archive folder
+                os.rename(item_path, new_path)
+            except Exception as e:
+                tkinter.messagebox.showerror("Error", f"An error occurred: {str(e)}")
+            else:
+                # Re-perform the search to refresh the results
+                search_files()
+
 def select_first_item(treeview):
     # Get the first item in the Treeview (if available)
     first_item = treeview.get_children()
@@ -287,6 +309,7 @@ context_menu.add_command(label="Open with Editor", command=open_with_editor)
 context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_to_underscores_context_menu)
 context_menu.add_command(label="Rename", command=rename_item)
 context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bin)
+context_menu.add_command(label="Move to Archive", command=move_to_archive)
 
 def show_context_menu(event):
     item = results.identify_row(event.y)
