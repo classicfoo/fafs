@@ -11,10 +11,9 @@ Download the script and place into the root folder for which you want to search.
 - Add open in editor to context menu allowing user to open txt files in editor.pyw
 - Press F2 to rename a file/folder.
 - Open text files in editor program
-
+- Add send to archive in context menu (or press backspace to archive)
 
 
 # Todo
-- Add send to archive in context menu (or press backspace to archive)
 - Add open in vscode in context menu
 - Make config file to set where root search folder is, where archive folder is and where editor.pwy is. 
