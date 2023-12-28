@@ -12,7 +12,6 @@ Download the script and place into the root folder for which you want to search.
 - Right click > Send to Archive (or press backspace to archive)
 - Right click > Spaces to Underscores (rename files by replaceing spaces with underscores)
 - Right click > Rename (Or Press F2 to rename a file/folder)
-- Add open in editor to context menu allowing user to open txt files in editor.pyw
 - Open text files in editor program
 - When right clicking, highlight the line underneath the cursor before showing context menu.
 
