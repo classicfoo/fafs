@@ -30,6 +30,14 @@ A simple file and folder search utility built with Python and Tkinter.
 - pyperclip
 - send2trash
 
+## Installation
+
+1. Clone or download this repository
+2. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
 ## Usage
 
 Run `search.pyw` to start the application. Type in the search box to filter files and folders.
