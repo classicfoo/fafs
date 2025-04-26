@@ -1,24 +1,35 @@
-# fafs
-file and folder search
+# File and Folder Search
 
-Download the script and place into the root folder for which you want to search.
+A simple file and folder search utility built with Python and Tkinter.
 
-![screenshot](https://github.com/classicfoo/fafs/assets/20607431/fdb6034b-5db6-4c65-bccc-de4ada5453fc)
+![Screenshot of File and Folder Search](screenshot.jpg)
 
-# Features
-- Right click > Copy Filename
-- Right click > Open in Explorer
-- Right click > Touch (Command allow user to send a file to the top of the list).
-- Right click > Send to Archive (or press backspace to archive)
-- Right click > Spaces to Underscores (rename files by replaceing spaces with underscores)
-- Right click > Rename (Or Press F2 to rename a file/folder)
-- Open text files in editor program
-- When right clicking, highlight the line underneath the cursor before showing context menu.
+## Features
 
-# Todo
-- Add open in vscode in context menu
-- Make config file to set where root search folder is, where archive folder is and where editor.pwy is. 
-- Add command palette (combobox) to the right of searchbar. It will have all the options listed in the context menu.
-- Hover over path to get popup label
-- Add Attributes Column
-- Remove open in editor from context menu
+- Real-time search as you type
+- Search through files and folders in current directory and subdirectories
+- Double-click to open files/folders
+- Right-click context menu with options:
+  - Copy Path
+  - Copy Filename
+  - Open in Explorer
+  - Touch (update timestamp)
+  - Open with Editor (for text files)
+  - Convert Spaces to Underscores
+  - Rename
+  - Move to Recycle Bin
+  - Move to Archive
+- Keyboard shortcuts:
+  - F2: Rename selected item
+  - Ctrl+Backspace: Delete previous word in search
+  - Enter: Open selected item
+
+## Requirements
+
+- Python 3.x
+- pyperclip
+- send2trash
+
+## Usage
+
+Run `search.pyw` to start the application. Type in the search box to filter files and folders.
