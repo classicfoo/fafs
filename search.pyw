@@ -322,6 +322,8 @@ context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_t
 context_menu.add_command(label="Rename", command=rename_item)
 context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bin)
 context_menu.add_command(label="Move to Archive", command=move_to_archive)
+context_menu.add_separator()  # Add a horizontal line
+context_menu.add_command(label="Settings", command=open_settings)
 
 def show_context_menu(event):
     item = results.identify_row(event.y)
@@ -355,7 +357,8 @@ results.bind('<F2>', lambda e: rename_item())
 # Bind the Backspace key to the move_to_archive function for the results Treeview
 # results.bind('<BackSpace>', lambda e: move_to_archive())
 
-
-
+# Add the settings function
+def open_settings():
+    tkinter.messagebox.showinfo("Settings", "Settings dialog coming soon!")
 
 window.mainloop()
