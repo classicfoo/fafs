@@ -8,6 +8,7 @@ import time
 import send2trash  # Import the send2trash library for moving files to the recycle bin
 from functools import partial  # Import functools.partial
 import subprocess
+import ctypes
 
 def move_to_archive():
     item = results.selection()
@@ -253,6 +254,7 @@ def open_with_editor():
     else:
         tkinter.messagebox.messagebox.showinfo("Info", "Selected file is not a text file.")
 
+
 # Assuming you have some way in your GUI to trigger this function (e.g., double-click, button, etc.)
 
 # Create the main window
@@ -341,7 +343,9 @@ results.bind("<FocusIn>", lambda event: select_first_item(results))
 results.bind('<F2>', lambda e: rename_item())
 
 # Bind the Backspace key to the move_to_archive function for the results Treeview
-results.bind('<BackSpace>', lambda e: move_to_archive())
+# results.bind('<BackSpace>', lambda e: move_to_archive())
+
+
 
 
 window.mainloop()
