@@ -19,8 +19,8 @@ def move_to_archive():
         if item_values:
             item_path = item_values[2]  # Get the full path (index 2)
             
-            # Define the path of the archive folder
-            archive_folder = "C:\\Users\\MichaelHuynh\\Documents\\archive"
+            # Get archive folder from config
+            archive_folder = load_config()['archive_directory']
             
             # Construct the new path in the archive folder
             new_path = os.path.join(archive_folder, os.path.basename(item_path))
