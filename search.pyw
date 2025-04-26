@@ -260,14 +260,28 @@ def open_with_editor():
 # Create the main window
 window = tk.Tk()
 window.title("File and Folder Search")
+
+# Apply the clam theme and configure styles
+style = ttk.Style()
+style.theme_use('clam')
+
+# Configure some style elements
+style.configure('Treeview', rowheight=25)  # Make rows a bit taller
+style.configure('Treeview.Heading', font=('TkDefaultFont', 9, 'bold'))  # Make headers bold
+style.configure('TEntry', padding=5)  # Add padding to entry
+
 center_window(window)
 
 # Bind the confirm_close function to the WM_DELETE_WINDOW protocol
 window.protocol("WM_DELETE_WINDOW", confirm_close)
 
+# Configure main window grid weights
+window.grid_rowconfigure(1, weight=1)  # Make the treeview row expandable
+window.grid_columnconfigure(0, weight=1)  # Make the window width expandable
+
 # Create an entry widget for user input
-entry = tk.Entry(window, width=30)
-entry.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+entry = ttk.Entry(window)
+entry.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=(5,5))
 entry.focus()
 
 # Bind the <Return> key event to the search function
@@ -275,31 +289,35 @@ entry.bind('<Return>', search_files)
 # Bind the Ctrl+Backspace key combination to the delete_previous_word function
 entry.bind("<Control-BackSpace>", delete_previous_word)
 
-# Create a treeview widget to display results with three columns
-results = ttk.Treeview(window, columns=("Type", "Path"))
-results.heading("#0", text="Item")  # Label the first column as "Item"
-results.heading("#1", text="Type")  # Label the second column as "Type"
-results.heading("#2", text="Path")  # Label the third column as "Path"
+# Create a frame to hold both the treeview and scrollbar
+tree_frame = ttk.Frame(window)
+tree_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=(0,5))
 
-# Configure column layout using the `column` method
-results.column("#0", width=200)
-results.column("#1", width=100)
-results.column("#2", width=400)
+# Configure tree_frame grid weights
+tree_frame.grid_rowconfigure(0, weight=1)
+tree_frame.grid_columnconfigure(0, weight=1)
+
+# Create a treeview widget to display results
+results = ttk.Treeview(tree_frame, columns=("Item", "Type", "Path"), show="headings")
+results.heading("Item", text="Item")  # Label the first column as "Item"
+results.heading("Type", text="Type")  # Label the second column as "Type"
+results.heading("Path", text="Path")  # Label the third column as "Path"
+
+# Configure column layout
+results.column("Item", width=100)
+results.column("Type", width=100)
+results.column("Path", width=400)
+
+# Create and configure the scrollbar to be integrated with the treeview
+scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=results.yview)
+results.configure(yscrollcommand=scrollbar.set)
+
+# Grid layout - place them together
+results.grid(row=0, column=0, sticky="nsew")
+scrollbar.grid(row=0, column=1, sticky="ns")
 
 # Bind double-click event to open items
 results.bind('<Double-1>', double_click)
-
-# Add a vertical scrollbar to the results
-scrollbar = ttk.Scrollbar(window, orient="vertical", command=results.yview)
-scrollbar.grid(row=1, column=1, sticky="ns")
-results.configure(yscrollcommand=scrollbar.set)
-
-# Configure row and column weights for resizing
-window.grid_rowconfigure(1, weight=1)
-window.grid_columnconfigure(0, weight=1)
-
-# Place the Treeview widget in the window
-results.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
 # Create a context menu for the Treeview
 context_menu = tk.Menu(window, tearoff=0)
