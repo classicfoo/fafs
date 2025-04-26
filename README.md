@@ -19,10 +19,20 @@ A simple file and folder search utility built with Python and Tkinter.
   - Rename
   - Move to Recycle Bin
   - Move to Archive
+  - Settings
 - Keyboard shortcuts:
   - F2: Rename selected item
   - Ctrl+Backspace: Delete previous word in search
   - Enter: Open selected item
+
+## Configuration
+
+The application uses a `config.json` file to store settings:
+- `search_directory`: The root directory to search in
+- `archive_directory`: Where files are moved when using "Move to Archive"
+- `editor_path`: Path to the text editor for opening text files
+
+You can modify these settings through the Settings dialog in the application.
 
 ## Requirements
 
