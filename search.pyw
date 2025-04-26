@@ -10,6 +10,7 @@ from functools import partial  # Import functools.partial
 import subprocess
 import ctypes
 import json
+from tkinter import filedialog
 
 def move_to_archive():
     item = results.selection()
@@ -159,7 +160,8 @@ def double_click(event=None):
 
         # Check if the file is a text file (you can add more extensions)
         if file_path.endswith(('.txt','.md')):
-            editor_path = "C:\\Users\\MichaelHuynh\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
+            # Get editor path from config
+            editor_path = load_config()['editor_path']
             subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
         else:
             # Just open the file with default application, no message needed
@@ -248,12 +250,13 @@ def open_with_editor():
     if item:
         file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
 
-    # Check if the file is a text file (you can add more extensions)
-    if file_path.endswith(('.txt','.md')):
-        editor_path = "C:\\Users\\MichaelHuynh\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
-        subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
-    else:
-        tkinter.messagebox.showinfo("Info", "Selected file is not a text file.")
+        # Check if the file is a text file (you can add more extensions)
+        if file_path.endswith(('.txt','.md')):
+            # Get editor path from config
+            editor_path = load_config()['editor_path']
+            subprocess.Popen(['python', editor_path, file_path], creationflags=subprocess.CREATE_NO_WINDOW)
+        else:
+            tkinter.messagebox.showinfo("Info", "Selected file is not a text file.")
 
 def load_config():
     try:
@@ -333,6 +336,91 @@ window.grid_columnconfigure(0, weight=1)
 # Bind double-click event to open items
 results.bind('<Double-1>', double_click)
 
+# Move these before the context menu creation
+class SettingsDialog(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Settings")
+        
+        # Apply the same theme
+        style = ttk.Style()
+        
+        # Configure the dialog
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        
+        # Create main frame with padding
+        main_frame = ttk.Frame(self, padding="10")
+        main_frame.grid(row=0, column=0, sticky="nsew")
+        
+        # Directory settings
+        ttk.Label(main_frame, text="Search Directory:").grid(row=0, column=0, sticky="w", pady=(0,5))
+        self.search_dir_var = tk.StringVar(value=get_search_directory())
+        search_dir_entry = ttk.Entry(main_frame, textvariable=self.search_dir_var, width=50)
+        search_dir_entry.grid(row=1, column=0, sticky="ew", padx=(0,5))
+        ttk.Button(main_frame, text="Browse", command=self.browse_search_dir).grid(row=1, column=1)
+        
+        ttk.Label(main_frame, text="Archive Directory:").grid(row=2, column=0, sticky="w", pady=(10,5))
+        self.archive_dir_var = tk.StringVar(value=load_config()['archive_directory'])
+        archive_dir_entry = ttk.Entry(main_frame, textvariable=self.archive_dir_var, width=50)
+        archive_dir_entry.grid(row=3, column=0, sticky="ew", padx=(0,5))
+        ttk.Button(main_frame, text="Browse", command=self.browse_archive_dir).grid(row=3, column=1)
+        
+        ttk.Label(main_frame, text="Editor Path:").grid(row=4, column=0, sticky="w", pady=(10,5))
+        self.editor_path_var = tk.StringVar(value=load_config()['editor_path'])
+        editor_path_entry = ttk.Entry(main_frame, textvariable=self.editor_path_var, width=50)
+        editor_path_entry.grid(row=5, column=0, sticky="ew", padx=(0,5))
+        ttk.Button(main_frame, text="Browse", command=self.browse_editor_path).grid(row=5, column=1)
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=6, column=0, columnspan=2, pady=(15,0))
+        ttk.Button(button_frame, text="Save", command=self.save_settings).pack(side="right", padx=5)
+        ttk.Button(button_frame, text="Cancel", command=self.destroy).pack(side="right")
+        
+        # Center the dialog
+        self.center_dialog()
+    
+    def center_dialog(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
+    
+    def browse_search_dir(self):
+        directory = tk.filedialog.askdirectory(initialdir=self.search_dir_var.get())
+        if directory:
+            self.search_dir_var.set(directory)
+    
+    def browse_archive_dir(self):
+        directory = tk.filedialog.askdirectory(initialdir=self.archive_dir_var.get())
+        if directory:
+            self.archive_dir_var.set(directory)
+    
+    def browse_editor_path(self):
+        file_path = tk.filedialog.askopenfilename(
+            initialdir=os.path.dirname(self.editor_path_var.get()),
+            filetypes=[("Python files", "*.py;*.pyw"), ("All files", "*.*")]
+        )
+        if file_path:
+            self.editor_path_var.set(file_path)
+    
+    def save_settings(self):
+        config = {
+            'search_directory': self.search_dir_var.get(),
+            'archive_directory': self.archive_dir_var.get(),
+            'editor_path': self.editor_path_var.get()
+        }
+        with open('config.json', 'w') as f:
+            json.dump(config, f, indent=4)
+        self.destroy()
+
+def open_settings():
+    SettingsDialog(window)
+
 # Create a context menu for the Treeview
 context_menu = tk.Menu(window, tearoff=0)
 context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
@@ -344,6 +432,9 @@ context_menu.add_command(label="Spaces to Underscores", command=convert_spaces_t
 context_menu.add_command(label="Rename", command=rename_item)
 context_menu.add_command(label="Move to Recycle Bin", command=move_to_recycle_bin)
 context_menu.add_command(label="Move to Archive", command=move_to_archive)
+context_menu.add_separator()  # Add a horizontal line
+context_menu.add_command(label="Settings", command=open_settings)
+
 
 def show_context_menu(event):
     item = results.identify_row(event.y)
@@ -376,8 +467,5 @@ results.bind('<F2>', lambda e: rename_item())
 
 # Bind the Backspace key to the move_to_archive function for the results Treeview
 # results.bind('<BackSpace>', lambda e: move_to_archive())
-
-
-
 
 window.mainloop()
