@@ -311,6 +311,10 @@ scrollbar.grid(row=0, column=1, sticky="ns")
 # Bind double-click event to open items
 results.bind('<Double-1>', double_click)
 
+# Add the settings function
+def open_settings():
+    tkinter.messagebox.showinfo("Settings", "Settings dialog coming soon!")
+
 # Create a context menu for the Treeview
 context_menu = tk.Menu(window, tearoff=0)
 context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
@@ -356,9 +360,5 @@ results.bind('<F2>', lambda e: rename_item())
 
 # Bind the Backspace key to the move_to_archive function for the results Treeview
 # results.bind('<BackSpace>', lambda e: move_to_archive())
-
-# Add the settings function
-def open_settings():
-    tkinter.messagebox.showinfo("Settings", "Settings dialog coming soon!")
 
 window.mainloop()
