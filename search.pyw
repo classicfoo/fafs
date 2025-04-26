@@ -17,7 +17,7 @@ def move_to_archive():
     if item:
         item_values = results.item(item, "values")
         if item_values:
-            item_path = item_values[1]  # Get the full path (index 1)
+            item_path = item_values[2]  # Get the full path (index 2)
             
             # Define the path of the archive folder
             archive_folder = "C:\\Users\\MichaelHuynh\\Documents\\archive"
@@ -99,11 +99,11 @@ def convert_spaces_to_underscores_context_menu():
     if item:
         item_values = results.item(item, "values")
         if item_values:
-            item_path = item_values[1]  # Get the full path (index 1)
+            item_path = item_values[2]  # Get the full path (index 2)
             new_path = convert_spaces_to_underscores(item_path)
             if new_path:
                 # Update the Treeview values with the new path
-                results.item(item, values=[item_values[0], new_path])
+                results.item(item, values=[item_values[0], item_values[1], new_path])
                 
                 # Update the Treeview text with the new filename
                 new_filename = os.path.basename(new_path)
@@ -131,7 +131,7 @@ def search_files(event=None):
 
     for item_info in file_list:
         item, item_type, full_path, _ = item_info
-        results.insert('', 'end', text=item, values=[item_type, full_path])
+        results.insert('', 'end', values=[item, item_type, full_path])
 
     # Set focus to the Treeview
     results.focus_set()
@@ -156,7 +156,7 @@ def double_click(event=None):
     item = results.selection()
 
     if item:
-        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+        file_path = results.item(item, 'values')[2]   # Get the full path (index 2)
 
         # Check if the file is a text file (you can add more extensions)
         if file_path.endswith(('.txt','.md')):
@@ -170,13 +170,13 @@ def double_click(event=None):
 def copy_path_to_clipboard():
     item = results.selection()
     if item:
-        item = results.item(item, "values")[1]  # Get the full path (index 1)
+        item = results.item(item, "values")[2]  # Get the full path (index 2)
         pyperclip.copy(item)
 
 def copy_filename_to_clipboard():
     item = results.selection()
     if item:
-        item = results.item(item, "values")[1]  # Get the full path (index 1)
+        item = results.item(item, "values")[2]  # Get the full path (index 2)
         filename = os.path.basename(item)  # Get only the filename
         filename_with_quotes = f'"{filename}"'  # Add quotes around the filename
         pyperclip.copy(filename_with_quotes)
@@ -184,13 +184,13 @@ def copy_filename_to_clipboard():
 def open_in_explorer():
     item = results.selection()
     if item:
-        item = results.item(item, "values")[1]  # Get the full path (index 1)
+        item = results.item(item, "values")[2]  # Get the full path (index 2)
         os.system(f'explorer /select,"{item}"')
 
 def touch_command():
     item = results.selection()
     if item:
-        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+        file_path = results.item(item, 'values')[2]   # Get the full path (index 2)
         current_time = time.time()
         os.utime(file_path, (current_time, current_time))  # Update the modification time
         search_files()
@@ -206,7 +206,7 @@ def rename_item():
     if item:
         item_values = results.item(item, "values")
         if item_values:
-            item_path = item_values[1]  # Get the full path (index 1)
+            item_path = item_values[2]  # Get the full path (index 2)
             
             # Extract the existing name from the path
             existing_name = os.path.basename(item_path)
@@ -221,7 +221,7 @@ def rename_item():
                     tkinter.messagebox.showerror("Error", f"An error occurred: {str(e)}")
                 else:
                     # Update the Treeview values with the new path
-                    results.item(item, values=[item_values[0], new_path])
+                    results.item(item, values=[item_values[0], item_values[1], new_path])
 
                     # Update the Treeview text with the new filename
                     new_filename = os.path.basename(new_path)
@@ -232,7 +232,7 @@ def move_to_recycle_bin():
     if item:
         item_values = results.item(item, "values")
         if item_values:
-            item_path = item_values[1]  # Get the full path (index 1)
+            item_path = item_values[2]  # Get the full path (index 2)
 
             # Prompt the user to confirm the action
             confirmed = tkinter.messagebox.askyesno("Confirm Move to Recycle Bin", f"Are you sure you want to move {item_path} to the recycle bin?")
@@ -248,7 +248,7 @@ def move_to_recycle_bin():
 def open_with_editor():
     item = results.selection()
     if item:
-        file_path = results.item(item, 'values')[1]   # Get the full path (index 1)
+        file_path = results.item(item, 'values')[2]   # Get the full path (index 2)
 
         # Check if the file is a text file (you can add more extensions)
         if file_path.endswith(('.txt','.md')):
@@ -296,9 +296,13 @@ center_window(window)
 # Bind the confirm_close function to the WM_DELETE_WINDOW protocol
 window.protocol("WM_DELETE_WINDOW", confirm_close)
 
+# Configure main window grid weights
+window.grid_rowconfigure(1, weight=1)  # Make the treeview row expandable
+window.grid_columnconfigure(0, weight=1)  # Make the window width expandable
+
 # Create an entry widget for user input
-entry = tk.Entry(window, width=30)
-entry.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+entry = ttk.Entry(window)
+entry.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=(5,5))
 entry.focus()
 
 # Bind the <Return> key event to the search function
@@ -306,32 +310,32 @@ entry.bind('<Return>', search_files)
 # Bind the Ctrl+Backspace key combination to the delete_previous_word function
 entry.bind("<Control-BackSpace>", delete_previous_word)
 
-# Create a treeview widget to display results
-results = ttk.Treeview(window, columns=("Type", "Path"))
+# Create a frame to hold both the treeview and scrollbar
+tree_frame = ttk.Frame(window)
+tree_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=(0,5))
 
-# IMPORTANT: The #0 column is the default first column in ttk.Treeview
-# It's used for displaying the tree structure and item names
-# DO NOT REMOVE THIS COLUMN - it displays the filename/foldername
-results.heading("#0", text="Item")  # Configure the default first column
-results.heading("Type", text="Type")
-results.heading("Path", text="Path")
+# Configure tree_frame grid weights
+tree_frame.grid_rowconfigure(0, weight=1)
+tree_frame.grid_columnconfigure(0, weight=1)
+
+# Create a treeview widget to display results
+results = ttk.Treeview(tree_frame, columns=("Item", "Type", "Path"), show="headings")
+results.heading("Item", text="Item")  # Label the first column as "Item"
+results.heading("Type", text="Type")  # Label the second column as "Type"
+results.heading("Path", text="Path")  # Label the third column as "Path"
 
 # Configure column layout
-results.column("#0", width=200)  # Width for Item column - KEEP THIS
+results.column("Item", width=100)
 results.column("Type", width=100)
 results.column("Path", width=400)
 
 # Create and configure the scrollbar to be integrated with the treeview
-scrollbar = ttk.Scrollbar(window, orient="vertical", command=results.yview)
+scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=results.yview)
 results.configure(yscrollcommand=scrollbar.set)
 
 # Grid layout - place them together
-results.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-scrollbar.grid(row=1, column=1, sticky="ns")
-
-# Configure row and column weights for resizing
-window.grid_rowconfigure(1, weight=1)
-window.grid_columnconfigure(0, weight=1)
+results.grid(row=0, column=0, sticky="nsew")
+scrollbar.grid(row=0, column=1, sticky="ns")
 
 # Bind double-click event to open items
 results.bind('<Double-1>', double_click)
