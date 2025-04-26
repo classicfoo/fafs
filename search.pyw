@@ -286,6 +286,8 @@ window.title("File and Folder Search")
 style = ttk.Style()
 style.theme_use('clam')
 
+style.configure("Vertical.TScrollbar", arrowsize=16, width=21) # keep this scrollbar width consistent
+
 # Configure some style elements
 style.configure('Treeview', rowheight=25)  # Make rows a bit taller
 style.configure('Treeview.Heading', font=('TkDefaultFont', 9, 'bold'))  # Make headers bold
