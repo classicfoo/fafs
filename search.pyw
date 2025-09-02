@@ -259,18 +259,17 @@ def open_with_editor():
             tkinter.messagebox.showinfo("Info", "Selected file is not a text file.")
 
 def load_config():
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
     try:
-        with open('config.json', 'r') as f:
+        with open(config_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        # Default configuration
         config = {
-            'search_directory': "C:\\Users\\MichaelHuynh\\Documents\\_my_documents",
-            'archive_directory': "C:\\Users\\MichaelHuynh\\Documents\\archive",
-            'editor_path': "C:\\Users\\MichaelHuynh\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
+            'search_directory': "C:\\Users\\61415\\Documents\\_my_documents",
+            'archive_directory': "C:\\Users\\61415\\Documents\\archive",
+            'editor_path': "C:\\Users\\61415\\Documents\\_my_documents\\projects\\editor\\editor.pyw"
         }
-        # Save default config
-        with open('config.json', 'w') as f:
+        with open(config_path, 'w') as f:
             json.dump(config, f, indent=4)
         return config
 
@@ -473,5 +472,8 @@ results.bind('<F2>', lambda e: rename_item())
 
 # Bind the Backspace key to the move_to_archive function for the results Treeview
 # results.bind('<BackSpace>', lambda e: move_to_archive())
+
+# after bindings are set up
+search_files()
 
 window.mainloop()
