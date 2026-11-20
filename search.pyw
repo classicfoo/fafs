@@ -113,14 +113,17 @@ def search_files(event=None):
     query = entry.get()
     keywords = query.split()
     file_list = []
+    config = load_config()
+    folders_only = config.get('search_type', 'all') == 'folders'
     
-    search_dir = get_search_directory()  # Function to get configured directory
+    search_dir = config['search_directory']
     for root, dirs, files in os.walk(search_dir):
-        for item in files + dirs:
+        items = dirs if folders_only else files + dirs
+        for item in items:
             item_lower = item.lower()
             if all(keyword.lower() in item_lower for keyword in keywords):
                 full_path = os.path.join(root, item)
-                item_type = "Folder" if os.path.isdir(full_path) else "File"
+                item_type = "Folder" if folders_only or os.path.isdir(full_path) else "File"
                 modified_time = os.path.getmtime(full_path)
                 file_list.append((item, item_type, full_path, modified_time))
 
@@ -377,10 +380,27 @@ class SettingsDialog(tk.Toplevel):
         editor_path_entry = ttk.Entry(main_frame, textvariable=self.editor_path_var, width=50)
         editor_path_entry.grid(row=5, column=0, sticky="ew", padx=(0,5))
         ttk.Button(main_frame, text="Browse", command=self.browse_editor_path).grid(row=5, column=1)
+
+        ttk.Label(main_frame, text="Search Results:").grid(row=6, column=0, sticky="w", pady=(10,5))
+        self.search_type_var = tk.StringVar(value=load_config().get('search_type', 'all'))
+        search_type_frame = ttk.Frame(main_frame)
+        search_type_frame.grid(row=7, column=0, columnspan=2, sticky="w")
+        ttk.Radiobutton(
+            search_type_frame,
+            text="Files and folders",
+            variable=self.search_type_var,
+            value="all"
+        ).pack(side="left", padx=(0,10))
+        ttk.Radiobutton(
+            search_type_frame,
+            text="Folders only",
+            variable=self.search_type_var,
+            value="folders"
+        ).pack(side="left")
         
         # Buttons
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=6, column=0, columnspan=2, pady=(15,0))
+        button_frame.grid(row=8, column=0, columnspan=2, pady=(15,0))
         ttk.Button(button_frame, text="Save", command=self.save_settings).pack(side="right", padx=5)
         ttk.Button(button_frame, text="Cancel", command=self.destroy).pack(side="right")
         
@@ -417,7 +437,8 @@ class SettingsDialog(tk.Toplevel):
         config = {
             'search_directory': self.search_dir_var.get(),
             'archive_directory': self.archive_dir_var.get(),
-            'editor_path': self.editor_path_var.get()
+            'editor_path': self.editor_path_var.get(),
+            'search_type': self.search_type_var.get()
         }
         with open('config.json', 'w') as f:
             json.dump(config, f, indent=4)
