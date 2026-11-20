@@ -442,22 +442,17 @@ context_menu.add_command(label="Settings", command=open_settings)
 
 
 def show_context_menu(event):
-    item = results.identify_row(event.y)
-    if item:
-        on_right_click(event)
-        context_menu.post(event.x_root, event.y_root)
+    on_right_click(event)
+    context_menu.post(event.x_root, event.y_root)
 
 def on_right_click(event):
-    # Identify the region at the cursor (column, row, etc.)
-    region = results.identify_region(event.x, event.y)
-    
-    # Check if the region is a row (an item in the TreeView)
-    if region == "tree":
-        # Identify the row under the cursor
-        row_id = results.identify_row(event.y)
-        
-        # Change the selection to this row
+    row_id = results.identify_row(event.y)
+    if row_id:
         results.selection_set(row_id)
+    else:
+        selected_items = results.selection()
+        if selected_items:
+            results.selection_remove(*selected_items)
 
 # Bind the right-click event to show the context menu
 results.bind("<Button-3>", show_context_menu)
