@@ -1,6 +1,12 @@
 # Search
 
+<p align="center"><img src="assets/logo/search-app-icon.svg" width="112" alt="Search squared S app icon"></p>
+
 Search is a desktop file and folder finder built with Rust and egui. It runs on Linux and Windows.
+
+## Windows download
+
+Download the latest portable [Search.exe](https://github.com/classicfoo/fafs/releases/latest/download/search.exe) from the [GitHub Releases page](https://github.com/classicfoo/fafs/releases).
 
 ## Features
 

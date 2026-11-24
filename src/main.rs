@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod actions;
 mod config;
 mod search;
@@ -705,9 +707,21 @@ impl eframe::App for SearchApp {
 
 fn main() -> eframe::Result<()> {
     env_logger::init();
+    let icon_image =
+        image::load_from_memory(include_bytes!("../assets/logo/search-app-icon-256.png"))
+            .expect("the bundled Search app icon should be a valid PNG")
+            .into_rgba8();
+    let (icon_width, icon_height) = icon_image.dimensions();
+    let app_icon = egui::IconData {
+        rgba: icon_image.into_raw(),
+        width: icon_width,
+        height: icon_height,
+    };
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Search")
+            .with_icon(app_icon)
             .with_inner_size([1080.0, 700.0])
             .with_min_inner_size([720.0, 420.0]),
         centered: true,
