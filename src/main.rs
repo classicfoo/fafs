@@ -751,6 +751,7 @@ impl eframe::App for SearchApp {
                             .id_salt("search-results-table")
                             .striped(true)
                             .resizable(true)
+                            .sense(egui::Sense::click())
                             .column(Column::initial(310.0).at_least(150.0).resizable(true))
                             .column(Column::initial(110.0).at_least(85.0))
                             .column(Column::remainder())
@@ -773,26 +774,10 @@ impl eframe::App for SearchApp {
                                     };
                                     let selected = self.selected.as_ref() == Some(&item.path);
                                     row.col(|ui| {
-                                        let response = ui.selectable_label(
+                                        let _ = ui.selectable_label(
                                             selected,
                                             RichText::new(&item.name).color(FOREGROUND),
                                         );
-                                        if response.clicked() {
-                                            self.selected = Some(item.path.clone());
-                                        }
-                                        if response.double_clicked() {
-                                            self.pending_action = Some(FileAction {
-                                                kind: FileActionKind::Open,
-                                                path: item.path.clone(),
-                                            });
-                                        }
-                                        response.context_menu(|ui| {
-                                            Self::show_context_menu(
-                                                ui,
-                                                &item,
-                                                &mut self.pending_action,
-                                            )
-                                        });
                                     });
                                     row.col(|ui| {
                                         let (label, tint) = if item.is_folder {
@@ -828,6 +813,19 @@ impl eframe::App for SearchApp {
                                                 .truncate(),
                                         )
                                         .on_hover_text(item.path.display().to_string());
+                                    });
+                                    let response = row.response();
+                                    if response.clicked() {
+                                        self.selected = Some(item.path.clone());
+                                    }
+                                    if response.double_clicked() {
+                                        self.pending_action = Some(FileAction {
+                                            kind: FileActionKind::Open,
+                                            path: item.path.clone(),
+                                        });
+                                    }
+                                    response.context_menu(|ui| {
+                                        Self::show_context_menu(ui, &item, &mut self.pending_action)
                                     });
                                 });
                             });
