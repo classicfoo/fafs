@@ -11,6 +11,13 @@ import subprocess
 import ctypes
 import json
 from tkinter import filedialog
+import sys
+try:
+    import winshell
+    CAN_COPY_FILES_TO_CLIPBOARD = (sys.platform == 'win32')
+except ImportError:
+    winshell = None
+    CAN_COPY_FILES_TO_CLIPBOARD = False
 
 def move_to_archive():
     item = results.selection()
@@ -280,6 +287,27 @@ def get_search_directory():
     config = load_config()
     return config['search_directory']
 
+def copy_file_to_clipboard():
+    item = results.selection()
+    if not item:
+        return
+
+    selected_item_id = item[0]
+    item_path = results.item(selected_item_id, "values")[2]
+
+    if not os.path.exists(item_path):
+        tkinter.messagebox.showerror("Error", f"File or folder not found: {item_path}")
+        return
+
+    if CAN_COPY_FILES_TO_CLIPBOARD and winshell:
+        try:
+            winshell.set_clipboard_files([item_path])
+            tkinter.messagebox.showinfo("Success", f"'{os.path.basename(item_path)}' copied to clipboard.")
+        except Exception as e:
+            tkinter.messagebox.showerror("Error", f"Failed to copy to clipboard: {e}")
+    else:
+        tkinter.messagebox.showinfo("Info", "Copying files/folders to clipboard is currently supported on Windows only.")
+
 # Create the main window
 window = tk.Tk()
 window.title("File and Folder Search")
@@ -451,6 +479,8 @@ def open_settings():
 context_menu = tk.Menu(window, tearoff=0)
 context_menu.add_command(label="Copy Path", command=copy_path_to_clipboard)
 context_menu.add_command(label="Copy Filename", command=copy_filename_to_clipboard)
+copy_file_command_state = tk.NORMAL if CAN_COPY_FILES_TO_CLIPBOARD else tk.DISABLED
+context_menu.add_command(label="Copy File", command=copy_file_to_clipboard, state=copy_file_command_state)
 context_menu.add_command(label="Open in Explorer", command=open_in_explorer)
 context_menu.add_command(label="Touch", command=touch_command)
 context_menu.add_command(label="Open with Editor", command=open_with_editor)

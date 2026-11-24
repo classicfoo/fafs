@@ -12,6 +12,7 @@ A simple file and folder search utility built with Python and Tkinter.
 - Right-click context menu with options:
   - Copy Path
   - Copy Filename
+  - Copy File (Windows only, copies the actual file/folder to clipboard)
   - Open in Explorer
   - Touch (update timestamp)
   - Open with Editor (for text files)
@@ -39,6 +40,7 @@ You can modify these settings through the Settings dialog in the application.
 - Python 3.x
 - pyperclip
 - send2trash
+- winshell (for "Copy File" feature on Windows)
 
 ## Installation
 

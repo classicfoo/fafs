@@ -138,5 +138,25 @@ class TestSearchStructure(unittest.TestCase):
                        "search_files not inserting values in correct order")
         print("✓ search_files inserts values in correct order")
 
+    def test_context_menu_copy_file(self):
+        """Test that 'Copy File' is in the context menu"""
+        print("\nChecking context menu for 'Copy File' command...")
+
+        copy_file_pattern = r'context_menu\.add_command\(label="Copy File"'
+        self.assertTrue(re.search(copy_file_pattern, self.code),
+                       "'Copy File' command not found in context menu")
+        print("✓ 'Copy File' command found in context menu")
+
+        # Check for the conditional state logic for the 'Copy File' command
+        conditional_state_pattern = r'copy_file_command_state\s*=\s*tk\.NORMAL\s*if\s*CAN_COPY_FILES_TO_CLIPBOARD\s*else\s*tk\.DISABLED'
+        self.assertTrue(re.search(conditional_state_pattern, self.code),
+                       "Conditional state logic for 'Copy File' menu item not found")
+        print("✓ Conditional state logic for 'Copy File' menu item found")
+
+        assign_state_pattern = r'context_menu\.add_command\(label="Copy File".*state=copy_file_command_state\)'
+        self.assertTrue(re.search(assign_state_pattern, self.code),
+                       "'Copy File' command does not use conditional state")
+        print("✓ 'Copy File' command uses conditional state")
+
 if __name__ == '__main__':
-    unittest.main(verbosity=2) 
+    unittest.main(verbosity=2)
