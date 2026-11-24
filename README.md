@@ -1,75 +1,33 @@
-# File and Folder Search
+# Search
 
-A simple file and folder search utility built with Python and Tkinter.
-
-![Screenshot of File and Folder Search](screenshot.jpg)
+Search is a desktop file and folder finder built with Rust and egui. It runs on Linux and Windows.
 
 ## Features
 
-- Real-time search as you type
-- Search through files and folders in current directory and subdirectories
-- Double-click to open files/folders
-- Right-click context menu with options:
-  - Copy Path
-  - Copy Filename
-  - Copy File (Windows only, copies the actual file/folder to clipboard)
-  - Open in Explorer
-  - Touch (update timestamp)
-  - Open with Editor (for text files)
-  - Convert Spaces to Underscores
-  - Rename
-  - Move to Recycle Bin
-  - Move to Archive
-  - Settings
-- Keyboard shortcuts:
-  - F2: Rename selected item
-  - Ctrl+Backspace: Delete previous word in search
-  - Enter: Open selected item
+- Live, case-insensitive filename search across nested folders. Separate words match independently, and results are sorted by modification time with the newest first.
+- Search all files and folders or folders only.
+- Open an item with its default application by double-clicking or pressing Enter.
+- Right-click actions for copying a path or quoted filename, revealing an item in the file manager, opening a text file with an editor, touching its modification time, renaming, converting spaces to lowercase underscores, archiving, and moving it to the system recycle bin/trash.
+- Copy a file or folder directly to the clipboard on Windows.
+- Search root, archive folder, editor, and result type settings saved in the operating system's per-user configuration directory.
+- F2 renames the selected item. Ctrl+Backspace removes the previous word from the search field.
 
-## Configuration
+## Build
 
-The application uses a `config.json` file to store settings:
-- `search_directory`: The root directory to search in
-- `archive_directory`: Where files are moved when using "Move to Archive"
-- `editor_path`: Path to the text editor for opening text files
+Install Rust with Cargo, then run:
 
-You can modify these settings through the Settings dialog in the application.
+```sh
+cargo build --release
+```
 
-## Requirements
+On Linux, the window system development packages for X11/Wayland and OpenGL are required. The GitHub Actions workflow builds on Ubuntu and Windows. On Windows, run the same Cargo command from a Rust toolchain prompt.
 
-- Python 3.x
-- pyperclip
-- send2trash
-- winshell (for "Copy File" feature on Windows)
+## Settings
 
-## Installation
+Open **Settings** in the app to choose the search directory, archive directory, optional editor application or script, and whether to include files or show folders only. The first launch uses the Documents folder when available, otherwise the home folder. An empty editor setting opens text files with the system's default application.
 
-1. Clone or download this repository
-2. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The bundled `config.example.json` shows the settings format. User settings are stored under the platform's standard configuration directory and are not written into the source checkout.
 
-## Usage
+## License
 
-Run `search.pyw` to start the application. Type in the search box to filter files and folders.
-
-## Autostart Setup (Recommended)
-
-To make the search tool automatically start when Windows boots:
-
-1. Press `Windows + R` to open Run dialog
-2. Type `shell:startup` and press Enter
-3. Create a shortcut to `search.pyw` in this startup folder:
-   - Right-click in the startup folder
-   - Select "New" → "Shortcut"
-   - Browse to your `search.pyw` file location
-   - Name the shortcut (e.g., "File Search")
-
-Alternatively, you can create a shortcut by:
-1. Right-click on `search.pyw`
-2. Select "Create shortcut"
-3. Cut and paste the shortcut into `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
-
-This ensures the search tool is always readily available when you need it.
-
+This project is licensed under GPL-3.0-or-later. See [LICENSE](LICENSE).
