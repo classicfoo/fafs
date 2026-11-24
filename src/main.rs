@@ -594,6 +594,19 @@ impl eframe::App for SearchApp {
                             search.request_focus();
                             self.search_focus_requested = true;
                         }
+                        if search.gained_focus()
+                            && !self.query.is_empty()
+                            && !ui.input(|input| {
+                                input.pointer.button_pressed(egui::PointerButton::Primary)
+                            })
+                            && let Some(mut state) = egui::TextEdit::load_state(&ctx, search.id)
+                        {
+                            state.cursor.set_char_range(Some(
+                                egui::text::CCursorRange::select_all_str(&self.query),
+                            ));
+                            state.store(&ctx, search.id);
+                            ctx.request_repaint();
+                        }
                         if search.changed() {
                             self.query_deadline = Some(Instant::now() + Duration::from_millis(220));
                         }
