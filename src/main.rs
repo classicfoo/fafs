@@ -937,7 +937,17 @@ impl eframe::App for SearchApp {
         self.result_focus_ids = current_result_focus_ids;
         if move_focus_to_search {
             self.focus_first_result_when_ready = false;
+            self.selected = None;
             ctx.memory_mut(|memory| memory.request_focus(search_id));
+            if !self.query.is_empty()
+                && let Some(mut state) = egui::TextEdit::load_state(&ctx, search_id)
+            {
+                state
+                    .cursor
+                    .set_char_range(Some(egui::text::CCursorRange::select_all_str(&self.query)));
+                state.store(&ctx, search_id);
+                ctx.request_repaint();
+            }
         } else if move_focus_to_results {
             self.focus_first_result_when_ready = true;
             if self.query != self.last_submitted_query || self.query_deadline.is_some() {
@@ -965,6 +975,14 @@ impl eframe::App for SearchApp {
             self.focus_first_result_when_ready = false;
         }
 
+        let enter_opens_result = enter_pressed
+            && !search_had_focus
+            && !ctx.any_popup_open()
+            && (result_had_focus || !ctx.egui_wants_keyboard_input());
+        if enter_opens_result && let Some(item) = self.selected_result() {
+            self.queue_action(FileActionKind::Open, item.path);
+        }
+
         if !ctx.egui_wants_keyboard_input()
             && !ctx.any_popup_open()
             && !(search_had_focus && enter_pressed)
@@ -973,10 +991,6 @@ impl eframe::App for SearchApp {
                 self.move_selection(1);
             } else if ctx.input(|input| input.key_pressed(Key::ArrowUp)) {
                 self.move_selection(-1);
-            } else if ctx.input(|input| input.key_pressed(Key::Enter)) {
-                if let Some(item) = self.selected_result() {
-                    self.queue_action(FileActionKind::Open, item.path);
-                }
             } else if ctx.input(|input| input.key_pressed(Key::F2)) {
                 if let Some(item) = self.selected_result() {
                     self.queue_action(FileActionKind::Rename, item.path);
