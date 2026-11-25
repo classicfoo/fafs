@@ -75,6 +75,8 @@ struct SearchApp {
     rename_value: String,
     confirm_delete: Option<PathBuf>,
     search_focus_requested: bool,
+    result_focus_ids: Vec<egui::Id>,
+    focus_first_result_when_ready: bool,
 }
 
 fn primary_button(ui: &mut egui::Ui, label: &str) -> egui::Response {
@@ -165,6 +167,8 @@ impl SearchApp {
             rename_value: String::new(),
             confirm_delete: None,
             search_focus_requested: false,
+            result_focus_ids: Vec::new(),
+            focus_first_result_when_ready: false,
         };
         app.start_search();
         app
@@ -199,6 +203,9 @@ impl SearchApp {
                 Ok(results) => {
                     let count = results.len();
                     self.results = results;
+                    if self.results.is_empty() {
+                        self.focus_first_result_when_ready = false;
+                    }
                     if self
                         .selected
                         .as_ref()
@@ -553,6 +560,17 @@ impl eframe::App for SearchApp {
         let ctx = root_ui.ctx().clone();
         self.poll_search();
         let mut run_search_now = false;
+        let search_id = root_ui.make_persistent_id("search-query");
+        let focused_before = ctx.memory(|memory| memory.focused());
+        let search_had_focus = focused_before == Some(search_id);
+        let result_had_focus =
+            focused_before.is_some_and(|focused| self.result_focus_ids.contains(&focused));
+        let tab_pressed = ctx.input(|input| input.key_pressed(Key::Tab));
+        let enter_pressed = ctx.input(|input| input.key_pressed(Key::Enter));
+        let move_focus_to_search = tab_pressed && result_had_focus;
+        let move_focus_to_results = search_had_focus && (tab_pressed || enter_pressed);
+        let mut current_result_focus_ids = Vec::new();
+        let mut first_result_focus_id = None;
         root_ui
             .painter()
             .rect_filled(root_ui.max_rect(), egui::CornerRadius::ZERO, CANVAS);
@@ -588,6 +606,7 @@ impl eframe::App for SearchApp {
                         let search = ui.add_sized(
                             [field_width, 38.0],
                             egui::TextEdit::singleline(&mut self.query)
+                                .id(search_id)
                                 .hint_text("For example: ramada resort"),
                         );
                         if !self.search_focus_requested {
@@ -610,9 +629,6 @@ impl eframe::App for SearchApp {
                         if search.changed() {
                             self.query_deadline = Some(Instant::now() + Duration::from_millis(220));
                         }
-                        if search.has_focus() && ui.input(|input| input.key_pressed(Key::Enter)) {
-                            run_search_now = true;
-                        }
                         if !self.query.is_empty() && ui.button("Clear").clicked() {
                             self.query.clear();
                             self.query_deadline = Some(Instant::now() + Duration::from_millis(220));
@@ -633,8 +649,7 @@ impl eframe::App for SearchApp {
                             |ui| {
                                 ui.add(
                                     egui::Label::new(RichText::new(&path).color(MUTED)).truncate(),
-                                )
-                                .on_hover_text(&path);
+                                );
                             },
                         );
                         if ui.button("Change folder").clicked() {
@@ -685,10 +700,12 @@ impl eframe::App for SearchApp {
                             }
                         });
                     });
-                });
+                ui.add_space(14.0);
+                ui.separator();
+                ui.add_space(8.0);
 
-            ui.add_space(12.0);
             if let Some(error) = self.error.clone() {
+                ui.add_space(4.0);
                 egui::Frame::new()
                     .fill(Color32::from_rgb(255, 242, 242))
                     .stroke(egui::Stroke::new(1.0, Color32::from_rgb(255, 201, 201)))
@@ -702,15 +719,8 @@ impl eframe::App for SearchApp {
                             }
                         });
                     });
-                ui.add_space(10.0);
             }
 
-            egui::Frame::new()
-                .fill(SURFACE)
-                .stroke(egui::Stroke::new(1.0, BORDER))
-                .corner_radius(egui::CornerRadius::same(8))
-                .inner_margin(egui::Margin::same(12))
-                .show(ui, |ui| {
                     ui.horizontal(|ui| {
                         ui.vertical(|ui| {
                             ui.heading(RichText::new("Results").size(17.0).strong());
@@ -786,13 +796,25 @@ impl eframe::App for SearchApp {
                                         return;
                                     };
                                     let selected = self.selected.as_ref() == Some(&item.path);
-                                    row.col(|ui| {
-                                        let _ = ui.selectable_label(
-                                            selected,
-                                            RichText::new(&item.name).color(FOREGROUND),
-                                        );
+                                    row.set_selected(selected);
+                                    let mut name_widget_response = None;
+                                    let (_, _name_cell_response) = row.col(|ui| {
+                                        name_widget_response = Some(ui.add_sized(
+                                            ui.available_size(),
+                                            egui::Button::new(
+                                                RichText::new(&item.name).color(FOREGROUND),
+                                            )
+                                            .frame(false)
+                                            .wrap(),
+                                        ));
                                     });
-                                    row.col(|ui| {
+                                    let name_response = name_widget_response
+                                        .expect("the result name button should be created");
+                                    current_result_focus_ids.push(name_response.id);
+                                    if index == 0 {
+                                        first_result_focus_id = Some(name_response.id);
+                                    }
+                                    let (_, type_response) = row.col(|ui| {
                                         let (label, tint) = if item.is_folder {
                                             ("Folder", Color32::from_rgb(221, 244, 255))
                                         } else {
@@ -814,7 +836,7 @@ impl eframe::App for SearchApp {
                                                 );
                                             });
                                     });
-                                    row.col(|ui| {
+                                    let (_, location_response) = row.col(|ui| {
                                         let location = item
                                             .path
                                             .parent()
@@ -824,20 +846,31 @@ impl eframe::App for SearchApp {
                                         ui.add(
                                             egui::Label::new(RichText::new(&location).color(MUTED))
                                                 .truncate(),
-                                        )
-                                        .on_hover_text(item.path.display().to_string());
+                                        );
                                     });
                                     let response = row.response();
-                                    if response.clicked() {
+                                    if name_response.clicked() || response.clicked() {
                                         self.selected = Some(item.path.clone());
+                                        ctx.memory_mut(|memory| {
+                                            memory.request_focus(name_response.id)
+                                        });
                                     }
-                                    if response.double_clicked() {
+                                    if name_response.double_clicked()
+                                        || type_response.double_clicked()
+                                        || location_response.double_clicked()
+                                    {
                                         self.pending_action = Some(FileAction {
                                             kind: FileActionKind::Open,
                                             path: item.path.clone(),
                                         });
                                     }
-                                    response.context_menu(|ui| {
+                                    name_response.context_menu(|ui| {
+                                        Self::show_context_menu(ui, &item, &mut self.pending_action)
+                                    });
+                                    type_response.context_menu(|ui| {
+                                        Self::show_context_menu(ui, &item, &mut self.pending_action)
+                                    });
+                                    location_response.context_menu(|ui| {
                                         Self::show_context_menu(ui, &item, &mut self.pending_action)
                                     });
                                 });
@@ -885,7 +918,7 @@ impl eframe::App for SearchApp {
                     }
                 } else {
                     ui.label(
-                        RichText::new("Enter to search or open · ↑/↓ to select · F2 to rename")
+                        RichText::new("Enter to view results · Tab to switch between search and results · ↑/↓ to select · F2 to rename")
                             .color(MUTED)
                             .size(11.0),
                     );
@@ -901,7 +934,20 @@ impl eframe::App for SearchApp {
             });
         });
 
-        if let Some(deadline) = self.query_deadline {
+        self.result_focus_ids = current_result_focus_ids;
+        if move_focus_to_search {
+            self.focus_first_result_when_ready = false;
+            ctx.memory_mut(|memory| memory.request_focus(search_id));
+        } else if move_focus_to_results {
+            self.focus_first_result_when_ready = true;
+            if self.query != self.last_submitted_query || self.query_deadline.is_some() {
+                run_search_now = true;
+            }
+        }
+
+        if run_search_now {
+            self.start_search();
+        } else if let Some(deadline) = self.query_deadline {
             if Instant::now() >= deadline && self.query != self.last_submitted_query {
                 self.start_search();
             } else if self.query != self.last_submitted_query {
@@ -909,11 +955,20 @@ impl eframe::App for SearchApp {
             }
         }
 
-        if run_search_now {
-            self.start_search();
+        if self.focus_first_result_when_ready
+            && !self.searching
+            && let Some(first_id) = first_result_focus_id
+            && let Some(first_result) = self.results.first()
+        {
+            self.selected = Some(first_result.path.clone());
+            ctx.memory_mut(|memory| memory.request_focus(first_id));
+            self.focus_first_result_when_ready = false;
         }
 
-        if !ctx.egui_wants_keyboard_input() && !ctx.any_popup_open() {
+        if !ctx.egui_wants_keyboard_input()
+            && !ctx.any_popup_open()
+            && !(search_had_focus && enter_pressed)
+        {
             if ctx.input(|input| input.key_pressed(Key::ArrowDown)) {
                 self.move_selection(1);
             } else if ctx.input(|input| input.key_pressed(Key::ArrowUp)) {
